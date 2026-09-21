@@ -25,7 +25,7 @@ DEFAULT_UNIT_ID: Final = 1
 DEFAULT_SCAN_SECONDS: Final = 15
 MIN_SCAN_SECONDS: Final = 5
 MAX_SCAN_SECONDS: Final = 300
-DEFAULT_TRANSPORT: Final = "tcp"
+DEFAULT_TRANSPORT: Final = "udp"
 DEFAULT_ADDR_OFFSET: Final = 0
 
 # Serial params (only used when transport == "rtutcp")
