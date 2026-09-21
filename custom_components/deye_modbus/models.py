@@ -14,6 +14,12 @@ from typing import Final
 _THREE_PHASE_MAP: Final = "sun_3ph_hybrid.yaml"
 
 MODELS: Final[dict[str, dict[str, str]]] = {
+    "sun20k_sg05lp3": {
+        "label": "Deye SUN-20K-SG05LP3 (3-phase hybrid)",
+        "map": _THREE_PHASE_MAP,
+        "manufacturer": "Deye",
+        "model": "SUN-20K-SG05LP3",
+    },
     "sun12k_sg05lp3": {
         "label": "Deye SUN-12K-SG05LP3 (3-phase hybrid)",
         "map": _THREE_PHASE_MAP,

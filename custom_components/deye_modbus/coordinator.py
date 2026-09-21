@@ -92,13 +92,16 @@ class DeyeModbusCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                     "timeout": 5,
                 }
                 self._client = AsyncModbusSerialClient(**params)
-            else:
+            elif self._transport == "udp":
                 try:
-                    #self._client = AsyncModbusTcpClient(self._host, port=self._port, timeout=5)
                     self._client = AsyncModbusUdpClient(self._host, port=self._port, timeout=5)
                 except TypeError:
-                    #self._client = AsyncModbusTcpClient(self._host, port=self._port)
                     self._client = AsyncModbusUdpClient(self._host, port=self._port)
+            else:
+                try:
+                    self._client = AsyncModbusTcpClient(self._host, port=self._port, timeout=5)
+                except TypeError:
+                    self._client = AsyncModbusTcpClient(self._host, port=self._port)
         if not bool(getattr(self._client, "connected", False)):
             try:
                 await self._client.connect()

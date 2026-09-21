@@ -91,7 +91,7 @@ class DeyeModbusOptionsFlow(config_entries.OptionsFlow):
 
     def _options_schema(self) -> vol.Schema:
         transport = str(self._entry_default(CONF_TRANSPORT, DEFAULT_TRANSPORT)).lower()
-        if transport not in {"tcp", "rtutcp"}:
+        if transport not in {"tcp", "udp", "rtutcp"}:
             transport = DEFAULT_TRANSPORT
         parity = str(self._entry_default(CONF_PARITY, DEFAULT_PARITY)).upper()
         if parity not in {"N", "E", "O"}:
@@ -100,7 +100,7 @@ class DeyeModbusOptionsFlow(config_entries.OptionsFlow):
             vol.Optional(CONF_SCAN_INTERVAL, default=self._entry_int_default(CONF_SCAN_INTERVAL, DEFAULT_SCAN_SECONDS)): vol.All(
                 vol.Coerce(int), vol.Range(min=MIN_SCAN_SECONDS, max=MAX_SCAN_SECONDS)
             ),
-            vol.Optional(CONF_TRANSPORT, default=transport): vol.In(["tcp", "rtutcp"]),
+            vol.Optional(CONF_TRANSPORT, default=transport): vol.In(["tcp", "udp", "rtutcp"]),
             vol.Optional(CONF_ADDR_OFFSET, default=self._entry_int_default(CONF_ADDR_OFFSET, DEFAULT_ADDR_OFFSET)): vol.Coerce(int),
             vol.Optional(CONF_BAUDRATE, default=self._entry_int_default(CONF_BAUDRATE, DEFAULT_BAUDRATE)): vol.Coerce(int),
             vol.Optional(CONF_BYTESIZE, default=self._entry_int_default(CONF_BYTESIZE, DEFAULT_BYTESIZE)): vol.Coerce(int),
