@@ -1,0 +1,37 @@
+{
+  "title": "Deye Modbus",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Připojit střídač Deye",
+        "description": "Vyberte model střídače a zadejte údaje pro připojení přes Modbus. Deye WiFi/LAN loggery obvykle poslouchají Modbus TCP na portu 8899; převodníky RS485-na-TCP většinou používají 502.",
+        "data": {
+          "model": "Model střídače",
+          "host": "Host / IP adresa",
+          "port": "Port",
+          "unit_id": "Modbus unit ID (slave)",
+          "scan_interval": "Interval čtení (s)"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Tento střídač je již nakonfigurován."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Možnosti",
+        "data": {
+          "scan_interval": "Interval čtení (s)",
+          "transport": "Transport (tcp / rtutcp)",
+          "address_offset": "Adresní offset",
+          "baudrate": "Baudrate (RTU přes TCP)",
+          "bytesize": "Datové bity (RTU přes TCP)",
+          "parity": "Parita (RTU přes TCP)",
+          "stopbits": "Stop bity (RTU přes TCP)"
+        }
+      }
+    }
+  }
+}

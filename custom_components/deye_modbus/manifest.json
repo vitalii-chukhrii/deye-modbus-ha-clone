@@ -1,0 +1,20 @@
+{
+  "domain": "deye_modbus",
+  "name": "Deye Modbus (Hybrid Inverter)",
+  "codeowners": [
+    "@Developer089"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/Developer089/deye-modbus-ha",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/Developer089/deye-modbus-ha/issues",
+  "loggers": [
+    "pymodbus",
+    "custom_components.deye_modbus"
+  ],
+  "requirements": [
+    "pymodbus>=3.5.0"
+  ],
+  "version": "0.1.1"
+}
