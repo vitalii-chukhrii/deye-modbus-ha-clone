@@ -1,0 +1,37 @@
+{
+  "title": "Deye Modbus",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect Deye inverter",
+        "description": "Select your inverter model and enter the Modbus connection details. Deye WiFi/LAN loggers usually expose Modbus TCP on port 8899; RS485-to-TCP gateways commonly use 502.",
+        "data": {
+          "model": "Inverter model",
+          "host": "Host / IP address",
+          "port": "Port",
+          "unit_id": "Modbus unit ID (slave)",
+          "scan_interval": "Scan interval (s)"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This inverter is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options",
+        "data": {
+          "scan_interval": "Scan interval (s)",
+          "transport": "Transport (tcp / rtutcp)",
+          "address_offset": "Address offset",
+          "baudrate": "Baud rate (RTU over TCP)",
+          "bytesize": "Byte size (RTU over TCP)",
+          "parity": "Parity (RTU over TCP)",
+          "stopbits": "Stop bits (RTU over TCP)"
+        }
+      }
+    }
+  }
+}
