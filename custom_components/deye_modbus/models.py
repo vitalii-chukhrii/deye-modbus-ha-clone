@@ -40,7 +40,7 @@ MODELS: Final[dict[str, dict[str, str]]] = {
     },
 }
 
-DEFAULT_MODEL: Final = "sun12k_sg05lp3"
+DEFAULT_MODEL: Final = "sun20k_sg05lp3"
 
 
 def model_options() -> dict[str, str]:
