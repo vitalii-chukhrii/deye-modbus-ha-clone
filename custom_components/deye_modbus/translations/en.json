@@ -24,7 +24,7 @@
         "title": "Options",
         "data": {
           "scan_interval": "Scan interval (s)",
-          "transport": "Transport (tcp / rtutcp)",
+          "transport": "Transport (tcp / udp / rtutcp)",
           "address_offset": "Address offset",
           "baudrate": "Baud rate (RTU over TCP)",
           "bytesize": "Byte size (RTU over TCP)",
