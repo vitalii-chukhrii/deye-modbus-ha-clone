@@ -10,9 +10,13 @@
           "host": "Host / IP adresa",
           "port": "Port",
           "unit_id": "Modbus unit ID (slave)",
-          "scan_interval": "Interval čtení (s)"
+          "scan_interval": "Běžný interval čtení (s)",
+          "fast_scan_interval": "Rychlý interval čtení (s)"
         }
       }
+    },
+    "error": {
+      "fast_interval_must_be_less_than_ordinary": "Rychlý interval čtení musí být kratší než běžný interval čtení."
     },
     "abort": {
       "already_configured": "Tento střídač je již nakonfigurován."
@@ -23,7 +27,8 @@
       "init": {
         "title": "Možnosti",
         "data": {
-          "scan_interval": "Interval čtení (s)",
+          "scan_interval": "Běžný interval čtení (s)",
+          "fast_scan_interval": "Rychlý interval čtení (s)",
           "transport": "Transport (tcp / rtutcp)",
           "address_offset": "Adresní offset",
           "baudrate": "Baudrate (RTU přes TCP)",
@@ -32,6 +37,9 @@
           "stopbits": "Stop bity (RTU přes TCP)"
         }
       }
+    },
+    "error": {
+      "fast_interval_must_be_less_than_ordinary": "Rychlý interval čtení musí být kratší než běžný interval čtení."
     }
   }
 }

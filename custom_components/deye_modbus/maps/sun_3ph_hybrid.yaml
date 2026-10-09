@@ -13,6 +13,7 @@
 #                                counters are little-endian by word)
 #   * temperatures            -> offset 1000, scale 0.1  =>  (raw-1000)*0.1 = °C
 #   * signed: true            -> value is two's-complement (marked "S16" in doc)
+#   * poll: fast               -> read at the fast interval; omitted defaults to ordinar
 # =====================================================================
 
 sensors:
@@ -21,6 +22,7 @@ sensors:
   - name: Run State
     unique_id: run_state
     register_type: holding
+    poll: fast
     address: 500
     count: 1
     options:
@@ -34,6 +36,7 @@ sensors:
   - name: PV1 Voltage
     unique_id: pv1_voltage
     register_type: holding
+    poll: fast
     address: 676
     count: 1
     scale: 0.1
@@ -44,6 +47,7 @@ sensors:
   - name: PV1 Current
     unique_id: pv1_current
     register_type: holding
+    poll: fast
     address: 677
     count: 1
     scale: 0.1
@@ -54,6 +58,7 @@ sensors:
   - name: PV1 Power
     unique_id: pv1_power
     register_type: holding
+    poll: fast
     address: 672
     count: 1
     scale: 1
@@ -64,6 +69,7 @@ sensors:
   - name: PV2 Voltage
     unique_id: pv2_voltage
     register_type: holding
+    poll: fast
     address: 678
     count: 1
     scale: 0.1
@@ -74,6 +80,7 @@ sensors:
   - name: PV2 Current
     unique_id: pv2_current
     register_type: holding
+    poll: fast
     address: 679
     count: 1
     scale: 0.1
@@ -84,6 +91,7 @@ sensors:
   - name: PV2 Power
     unique_id: pv2_power
     register_type: holding
+    poll: fast
     address: 673
     count: 1
     scale: 1
@@ -95,6 +103,7 @@ sensors:
   - name: PV3 Voltage
     unique_id: pv3_voltage
     register_type: holding
+    poll: fast
     address: 680
     count: 1
     scale: 0.1
@@ -106,6 +115,7 @@ sensors:
   - name: PV3 Current
     unique_id: pv3_current
     register_type: holding
+    poll: fast
     address: 681
     count: 1
     scale: 0.1
@@ -117,6 +127,7 @@ sensors:
   - name: PV3 Power
     unique_id: pv3_power
     register_type: holding
+    poll: fast
     address: 674
     count: 1
     scale: 1
@@ -128,6 +139,7 @@ sensors:
   - name: PV4 Voltage
     unique_id: pv4_voltage
     register_type: holding
+    poll: fast
     address: 682
     count: 1
     scale: 0.1
@@ -139,6 +151,7 @@ sensors:
   - name: PV4 Current
     unique_id: pv4_current
     register_type: holding
+    poll: fast
     address: 683
     count: 1
     scale: 0.1
@@ -150,6 +163,7 @@ sensors:
   - name: PV4 Power
     unique_id: pv4_power
     register_type: holding
+    poll: fast
     address: 675
     count: 1
     scale: 1
@@ -162,6 +176,7 @@ sensors:
   - name: Battery SOC
     unique_id: battery_soc
     register_type: holding
+    poll: fast
     address: 588
     count: 1
     scale: 1
@@ -172,6 +187,7 @@ sensors:
   - name: Battery Voltage
     unique_id: battery_voltage
     register_type: holding
+    poll: fast
     address: 587
     count: 1
     scale: 0.01
@@ -183,6 +199,7 @@ sensors:
   - name: Battery Current
     unique_id: battery_current
     register_type: holding
+    poll: fast
     address: 591
     count: 1
     scale: 0.01
@@ -194,6 +211,7 @@ sensors:
   - name: Battery Power
     unique_id: battery_power
     register_type: holding
+    poll: fast
     address: 590
     count: 1
     scale: 1
@@ -228,6 +246,7 @@ sensors:
   - name: Grid Voltage L1
     unique_id: grid_voltage_l1
     register_type: holding
+    poll: fast
     address: 598
     count: 1
     scale: 0.1
@@ -238,6 +257,7 @@ sensors:
   - name: Grid Voltage L2
     unique_id: grid_voltage_l2
     register_type: holding
+    poll: fast
     address: 599
     count: 1
     scale: 0.1
@@ -248,6 +268,7 @@ sensors:
   - name: Grid Voltage L3
     unique_id: grid_voltage_l3
     register_type: holding
+    poll: fast
     address: 600
     count: 1
     scale: 0.1
@@ -338,6 +359,7 @@ sensors:
   - name: Grid Power
     unique_id: grid_power_total
     register_type: holding
+    poll: fast
     address: 619
     count: 1
     scale: 1
@@ -431,6 +453,7 @@ sensors:
   - name: Inverter Power
     unique_id: inverter_power_total
     register_type: holding
+    poll: fast
     address: 636
     count: 1
     scale: 1
@@ -523,6 +546,7 @@ sensors:
   - name: Load Power
     unique_id: load_power_total
     register_type: holding
+    poll: fast
     address: 653
     count: 1
     scale: 1
@@ -617,6 +641,7 @@ sensors:
   - name: PV Production Today
     unique_id: pv_energy_today
     register_type: holding
+    poll: ordinar
     address: 529
     count: 1
     scale: 0.1
@@ -649,6 +674,7 @@ sensors:
   - name: Battery Charge Today
     unique_id: battery_charge_today
     register_type: holding
+    poll: ordinar
     address: 514
     count: 1
     scale: 0.1

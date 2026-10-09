@@ -18,6 +18,7 @@ Local Home Assistant integration for **Deye three-phase hybrid inverters** (SUN-
 - Writable **controls** as native HA entities: work mode, solar sell, grid/generator charge, battery current & SOC limits, max sell power, and full 6-slot time-of-use programming.
 - Driven by a human-readable **YAML register map** — adding a model is just a new map file, no code changes.
 - **Options flow** to tune scan interval, transport, address offset and serial parameters at any time.
+- **Two polling cadences**: frequently changing telemetry is polled fast, while other registers use the ordinary interval.
 - Low-level **services** for advanced/manual register access.
 - `pymodbus` is pulled in automatically by Home Assistant via the manifest.
 
@@ -52,7 +53,8 @@ When you add the integration you get a single setup form:
 | **Host / IP** | — | IP address of the inverter's logger or your RS485↔TCP gateway, e.g. `192.168.x.x`. |
 | **Port** | `8899` | See the port guidance below. |
 | **Modbus unit ID** | `1` | The Modbus slave/device address. Leave at `1` unless you changed it on a gateway. |
-| **Scan interval (s)** | `15` | How often to poll, range **5–300** seconds. |
+| **Ordinary scan interval (s)** | `15` | Polling cadence for ordinary registers, range **5–300** seconds. |
+| **Fast scan interval (s)** | `5` | Polling cadence for registers marked `poll: fast`, range **1–300** seconds; must be shorter than the ordinary interval. |
 
 ### Which port?
 
@@ -115,10 +117,13 @@ Rebadged units on the same platform (Sunsynk, etc.) will generally work too.
 
 Open the integration and click **Configure** to change (no restart needed — the entry reloads):
 
-- **Scan interval** — 5–300 s.
+- **Ordinary scan interval** — cadence for registers with `poll: ordinar` (also the default for map entries without `poll`).
+- **Fast scan interval** — 1–300 s for registers marked `poll: fast`; it must be shorter than the ordinary interval. The default is 5 seconds.
 - **Transport** — `tcp` (standard Modbus TCP) or `rtutcp` (RTU frame over a raw TCP socket, for some gateways).
 - **Address offset** — added to every register address, for gateways that shift the map.
 - **Serial parameters** — baud rate, byte size, parity (N/E/O), stop bits (only relevant for `rtutcp`).
+
+In the YAML register map, set `poll: fast` or `poll: ordinar` on each sensor. If omitted, `poll` defaults to `ordinar`. The bundled map uses fast polling for inverter status and live PV, battery, grid, inverter, and load measurements.
 
 ---
 
@@ -198,7 +203,8 @@ Ve formuláři při přidání integrace zadáte:
 - **Host / IP** — adresa loggeru nebo převodníku, např. `192.168.x.x`.
 - **Port** — `8899` pro WiFi/LAN logger Deye, `502` pro převodník RS485↔TCP. Pokud si nejste jistí, zkuste nejdřív `8899`.
 - **Modbus unit ID** — obvykle `1`.
-- **Interval dotazování** — `15` s (rozsah 5–300 s).
+- **Běžný interval čtení** — `15` s (rozsah 5–300 s), pro registry s `poll: ordinar` nebo bez atributu `poll`.
+- **Rychlý interval čtení** — `5` s pro registry označené `poll: fast`; musí být kratší než běžný interval.
 
 IP adresu měniče najdete v seznamu klientů DHCP na routeru; doporučuje se nastavit statickou (rezervovanou) adresu.
 

@@ -10,9 +10,13 @@
           "host": "Host / IP address",
           "port": "Port",
           "unit_id": "Modbus unit ID (slave)",
-          "scan_interval": "Scan interval (s)"
+          "scan_interval": "Ordinary scan interval (s)",
+          "fast_scan_interval": "Fast scan interval (s)"
         }
       }
+    },
+    "error": {
+      "fast_interval_must_be_less_than_ordinary": "Fast scan interval must be shorter than ordinary scan interval."
     },
     "abort": {
       "already_configured": "This inverter is already configured."
@@ -23,7 +27,8 @@
       "init": {
         "title": "Options",
         "data": {
-          "scan_interval": "Scan interval (s)",
+          "scan_interval": "Ordinary scan interval (s)",
+          "fast_scan_interval": "Fast scan interval (s)",
           "transport": "Transport (tcp / udp / rtutcp)",
           "address_offset": "Address offset",
           "baudrate": "Baud rate (RTU over TCP)",
@@ -32,6 +37,9 @@
           "stopbits": "Stop bits (RTU over TCP)"
         }
       }
+    },
+    "error": {
+      "fast_interval_must_be_less_than_ordinary": "Fast scan interval must be shorter than ordinary scan interval."
     }
   }
 }

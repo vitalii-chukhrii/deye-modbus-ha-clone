@@ -15,11 +15,13 @@ from homeassistant.helpers.selector import (
 
 from .const import (
     DOMAIN, CONF_UNIT_ID, CONF_SCAN_INTERVAL, CONF_MODEL,
-    DEFAULT_SCAN_SECONDS, DEFAULT_PORT, DEFAULT_UNIT_ID,
+    CONF_FAST_SCAN_INTERVAL, DEFAULT_SCAN_SECONDS, DEFAULT_FAST_SCAN_SECONDS,
+    DEFAULT_PORT, DEFAULT_UNIT_ID,
     CONF_TRANSPORT, DEFAULT_TRANSPORT,
     CONF_BAUDRATE, DEFAULT_BAUDRATE, CONF_BYTESIZE, DEFAULT_BYTESIZE,
     CONF_PARITY, DEFAULT_PARITY, CONF_STOPBITS, DEFAULT_STOPBITS,
-    CONF_ADDR_OFFSET, DEFAULT_ADDR_OFFSET, MIN_SCAN_SECONDS, MAX_SCAN_SECONDS,
+    CONF_ADDR_OFFSET, DEFAULT_ADDR_OFFSET, MIN_SCAN_SECONDS, MIN_FAST_SCAN_SECONDS,
+    MAX_SCAN_SECONDS,
 )
 from .models import model_options, get_model, DEFAULT_MODEL
 
@@ -45,6 +47,9 @@ def _user_schema() -> vol.Schema:
         vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_SECONDS): vol.All(
             vol.Coerce(int), vol.Range(min=MIN_SCAN_SECONDS, max=MAX_SCAN_SECONDS)
         ),
+        vol.Optional(CONF_FAST_SCAN_INTERVAL, default=DEFAULT_FAST_SCAN_SECONDS): vol.All(
+            vol.Coerce(int), vol.Range(min=MIN_FAST_SCAN_SECONDS, max=MAX_SCAN_SECONDS)
+        ),
     })
 
 
@@ -54,13 +59,18 @@ class DeyeModbusConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input: dict[str, Any] | None = None):
         errors: dict[str, str] = {}
         if user_input is not None:
-            host = user_input[CONF_HOST]
-            unique = f"{host}:{user_input.get(CONF_PORT, DEFAULT_PORT)}:{user_input.get(CONF_UNIT_ID, DEFAULT_UNIT_ID)}"
-            await self.async_set_unique_id(unique)
-            self._abort_if_unique_id_configured()
-            model = get_model(user_input.get(CONF_MODEL))
-            title = f"Deye {model['model']} @ {host}"
-            return self.async_create_entry(title=title, data=user_input)
+            if user_input.get(CONF_FAST_SCAN_INTERVAL, DEFAULT_FAST_SCAN_SECONDS) >= user_input.get(
+                CONF_SCAN_INTERVAL, DEFAULT_SCAN_SECONDS
+            ):
+                errors["base"] = "fast_interval_must_be_less_than_ordinary"
+            else:
+                host = user_input[CONF_HOST]
+                unique = f"{host}:{user_input.get(CONF_PORT, DEFAULT_PORT)}:{user_input.get(CONF_UNIT_ID, DEFAULT_UNIT_ID)}"
+                await self.async_set_unique_id(unique)
+                self._abort_if_unique_id_configured()
+                model = get_model(user_input.get(CONF_MODEL))
+                title = f"Deye {model['model']} @ {host}"
+                return self.async_create_entry(title=title, data=user_input)
         return self.async_show_form(
             step_id="user", data_schema=_user_schema(), errors=errors
         )
@@ -90,6 +100,11 @@ class DeyeModbusOptionsFlow(config_entries.OptionsFlow):
             return fallback
 
     def _options_schema(self) -> vol.Schema:
+        ordinary_interval = self._entry_int_default(CONF_SCAN_INTERVAL, DEFAULT_SCAN_SECONDS)
+        default_fast_interval = max(
+            MIN_FAST_SCAN_SECONDS,
+            min(DEFAULT_FAST_SCAN_SECONDS, ordinary_interval - 1),
+        )
         transport = str(self._entry_default(CONF_TRANSPORT, DEFAULT_TRANSPORT)).lower()
         if transport not in {"tcp", "udp", "rtutcp"}:
             transport = DEFAULT_TRANSPORT
@@ -99,6 +114,11 @@ class DeyeModbusOptionsFlow(config_entries.OptionsFlow):
         return vol.Schema({
             vol.Optional(CONF_SCAN_INTERVAL, default=self._entry_int_default(CONF_SCAN_INTERVAL, DEFAULT_SCAN_SECONDS)): vol.All(
                 vol.Coerce(int), vol.Range(min=MIN_SCAN_SECONDS, max=MAX_SCAN_SECONDS)
+            ),
+            vol.Optional(CONF_FAST_SCAN_INTERVAL, default=self._entry_int_default(
+                CONF_FAST_SCAN_INTERVAL, default_fast_interval
+            )): vol.All(
+                vol.Coerce(int), vol.Range(min=MIN_FAST_SCAN_SECONDS, max=MAX_SCAN_SECONDS)
             ),
             vol.Optional(CONF_TRANSPORT, default=transport): vol.In(["tcp", "udp", "rtutcp"]),
             vol.Optional(CONF_ADDR_OFFSET, default=self._entry_int_default(CONF_ADDR_OFFSET, DEFAULT_ADDR_OFFSET)): vol.Coerce(int),
@@ -116,7 +136,10 @@ class DeyeModbusOptionsFlow(config_entries.OptionsFlow):
             except vol.Invalid:
                 errors["base"] = "invalid_input"
             else:
-                return self.async_create_entry(title="", data=user_input)
+                if user_input[CONF_FAST_SCAN_INTERVAL] >= user_input[CONF_SCAN_INTERVAL]:
+                    errors["base"] = "fast_interval_must_be_less_than_ordinary"
+                else:
+                    return self.async_create_entry(title="", data=user_input)
         return self.async_show_form(
             step_id="init", data_schema=self._options_schema(), errors=errors
         )

@@ -8,12 +8,13 @@ from homeassistant.const import Platform, CONF_HOST, CONF_PORT
 import homeassistant.helpers.config_validation as cv
 
 from .const import (
-    DOMAIN, CONF_UNIT_ID, CONF_SCAN_INTERVAL, CONF_MODEL, DEFAULT_SCAN_SECONDS,
+    DOMAIN, CONF_UNIT_ID, CONF_SCAN_INTERVAL, CONF_FAST_SCAN_INTERVAL,
+    CONF_MODEL, DEFAULT_SCAN_SECONDS, DEFAULT_FAST_SCAN_SECONDS,
     DEFAULT_PORT, DEFAULT_UNIT_ID,
     CONF_TRANSPORT, DEFAULT_TRANSPORT, CONF_BAUDRATE, DEFAULT_BAUDRATE,
     CONF_BYTESIZE, DEFAULT_BYTESIZE, CONF_PARITY, DEFAULT_PARITY,
     CONF_STOPBITS, DEFAULT_STOPBITS, CONF_ADDR_OFFSET, DEFAULT_ADDR_OFFSET,
-    MIN_SCAN_SECONDS, MAX_SCAN_SECONDS,
+    MIN_SCAN_SECONDS, MIN_FAST_SCAN_SECONDS, MAX_SCAN_SECONDS,
 )
 from .coordinator import DeyeModbusCoordinator, RegisterDef
 from .mapping import load_register_mapping
@@ -28,7 +29,7 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 _REGISTER_FIELDS = {
     "name", "unique_id", "register_type", "address", "count", "scale", "offset",
     "unit_of_measurement", "device_class", "state_class", "signed", "word_order",
-    "options", "mask", "icon", "enabled_default", "precision",
+    "options", "mask", "icon", "enabled_default", "precision", "poll",
 }
 
 
@@ -79,8 +80,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     port = entry.data.get(CONF_PORT, DEFAULT_PORT)
     unit_id = entry.data.get(CONF_UNIT_ID, DEFAULT_UNIT_ID)
     model_key = entry.data.get(CONF_MODEL)
-    scan_interval = entry.options.get(CONF_SCAN_INTERVAL, entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_SECONDS))
-    scan_interval = max(MIN_SCAN_SECONDS, min(MAX_SCAN_SECONDS, int(scan_interval)))
+    ordinary_scan_interval = entry.options.get(
+        CONF_SCAN_INTERVAL, entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_SECONDS)
+    )
+    ordinary_scan_interval = max(
+        MIN_SCAN_SECONDS, min(MAX_SCAN_SECONDS, int(ordinary_scan_interval))
+    )
+    fast_scan_interval = entry.options.get(
+        CONF_FAST_SCAN_INTERVAL,
+        entry.data.get(
+            CONF_FAST_SCAN_INTERVAL,
+            min(DEFAULT_FAST_SCAN_SECONDS, ordinary_scan_interval - 1),
+        ),
+    )
+    fast_scan_interval = max(
+        MIN_FAST_SCAN_SECONDS, min(MAX_SCAN_SECONDS, int(fast_scan_interval))
+    )
+    if fast_scan_interval >= ordinary_scan_interval:
+        raise ValueError("Fast scan interval must be shorter than ordinary scan interval")
     transport = entry.options.get(CONF_TRANSPORT, entry.data.get(CONF_TRANSPORT, DEFAULT_TRANSPORT))
     addr_offset = entry.options.get(CONF_ADDR_OFFSET, DEFAULT_ADDR_OFFSET)
     serial_params = {
@@ -102,7 +119,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         for r in sensors_cfg
     ]
     coordinator = DeyeModbusCoordinator(
-        hass, host, port, unit_id, registers, scan_interval,
+        hass, host, port, unit_id, registers, ordinary_scan_interval,
+        fast_scan_interval=fast_scan_interval,
         transport=transport, serial_params=serial_params, address_offset=addr_offset,
     )
     hass.data.setdefault(DOMAIN, {})

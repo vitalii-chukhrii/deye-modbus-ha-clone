@@ -1,14 +1,14 @@
 """DataUpdateCoordinator that polls a Deye hybrid inverter over Modbus.
 
-Deye three-phase hybrid inverters expose *all* live measurements through the
-holding-register space (function code 0x03), including the 500+ real-time block.
-Unlike some vendors there is no separate "read once" settings space here, so
-every mapped register is polled each cycle. Contiguous registers are batched
-into single Modbus reads to keep the poll cheap.
+Deye three-phase hybrid inverters expose measurements through the holding-register
+space (function code 0x03), including the 500+ real-time block. Registers are
+assigned fast or ordinary polling cadences in the map; contiguous registers are
+batched into Modbus reads to keep polling efficient.
 """
 from __future__ import annotations
 import asyncio
 import logging
+import time
 from dataclasses import dataclass
 from datetime import timedelta
 from typing import Any, Dict, List
@@ -46,10 +46,15 @@ class RegisterDef:
     icon: str | None = None
     enabled_default: bool = True             # entity_registry_enabled_default
     precision: int | None = None             # suggested_display_precision (decimals)
+    poll: str = "ordinar"
+
+    def __post_init__(self) -> None:
+        if self.poll not in {"fast", "ordinar"}:
+            raise ValueError(f"Invalid register poll class {self.poll!r}")
 
 
 class DeyeModbusCoordinator(DataUpdateCoordinator[dict[str, Any]]):
-    """Polls all mapped registers each cycle and decodes them."""
+    """Polls fast registers each cycle and ordinary registers less often."""
 
     def __init__(
         self,
@@ -58,17 +63,20 @@ class DeyeModbusCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         port: int,
         unit_id: int,
         registers: List[RegisterDef],
-        scan_interval: int,
+        ordinary_scan_interval: int,
+        fast_scan_interval: int,
         transport: str = "tcp",
         serial_params: dict | None = None,
         address_offset: int = 0,
     ) -> None:
         super().__init__(
             hass, _LOGGER, name="deye_modbus coordinator",
-            update_interval=timedelta(seconds=scan_interval),
+            update_interval=timedelta(seconds=fast_scan_interval),
         )
         self._host, self._port, self._unit_id = host, port, int(unit_id)
         self._registers: List[RegisterDef] = registers
+        self._ordinary_scan_interval = ordinary_scan_interval
+        self._last_ordinary_poll: float | None = None
         self._transport = (transport or "tcp").lower()
         self._serial_params = serial_params or {}
         self._client = None
@@ -113,20 +121,43 @@ class DeyeModbusCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     async def _async_update_data(self) -> dict[str, Any]:
         async with self._lock:
             try:
-                result: dict[str, Any] = {}
-                inputs = [r for r in self._registers if r.register_type == "input"]
-                holdings = [r for r in self._registers if r.register_type != "input"]
-                if holdings:
-                    await self._read_grouped(holdings, result, self._read_holding)
-                if inputs:
-                    await self._read_grouped(inputs, result, self._read_input)
+                now = time.monotonic()
+                poll_ordinary = (
+                    self._last_ordinary_poll is None
+                    or now - self._last_ordinary_poll >= self._ordinary_scan_interval
+                )
+                result = dict(self.data or {})
+                fast_registers = [r for r in self._registers if r.poll == "fast"]
+                ordinary_registers = [r for r in self._registers if r.poll == "ordinar"]
+                await self._poll_registers(fast_registers, result, merge_gap=0)
+                if poll_ordinary:
+                    await self._poll_registers(ordinary_registers, result)
+                    self._last_ordinary_poll = time.monotonic()
                 return result
             except Exception as err:  # noqa: BLE001
                 raise UpdateFailed(err) from err
 
-    async def _read_grouped(self, regs: list[RegisterDef], out: dict[str, Any], fn):
+    async def _poll_registers(
+        self,
+        registers: list[RegisterDef],
+        result: dict[str, Any],
+        merge_gap: int = 8,
+    ) -> None:
+        inputs = [r for r in registers if r.register_type == "input"]
+        holdings = [r for r in registers if r.register_type != "input"]
+        if holdings:
+            await self._read_grouped(holdings, result, self._read_holding, merge_gap)
+        if inputs:
+            await self._read_grouped(inputs, result, self._read_input, merge_gap)
+
+    async def _read_grouped(
+        self,
+        regs: list[RegisterDef],
+        out: dict[str, Any],
+        fn,
+        merge_gap: int = 8,
+    ):
         regs = sorted(regs, key=lambda r: r.address)
-        GAP = 8          # merge registers within this many words into one read
         MAX_WORDS = 110  # keep each Modbus frame comfortably below the 125 limit
         start = end = None
         acc: list[RegisterDef] = []
@@ -134,7 +165,7 @@ class DeyeModbusCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             if start is None:
                 start, end, acc = r.address, r.address + r.count, [r]
                 continue
-            if r.address <= end + GAP and (r.address + r.count - start) <= MAX_WORDS:
+            if r.address <= end + merge_gap and (r.address + r.count - start) <= MAX_WORDS:
                 end = max(end, r.address + r.count)
                 acc.append(r)
             else:
@@ -142,6 +173,11 @@ class DeyeModbusCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 start, end, acc = r.address, r.address + r.count, [r]
         if start is not None:
             await self._read_window(fn, out, start, end, acc)
+
+    async def async_request_refresh(self) -> None:
+        """Refresh both polling classes when a caller explicitly requests fresh data."""
+        self._last_ordinary_poll = None
+        await super().async_request_refresh()
 
     async def _read_window(self, fn, out, start, end, regs):
         raw = await fn(self._addr(start), end - start)
