@@ -12,6 +12,7 @@ Local Home Assistant integration for **Deye three-phase hybrid inverters** (SUN-
 ## Features
 
 - 100% **local polling** over Modbus TCP — nothing leaves your network.
+- Modbus over UDP supported 
 - Talks directly to the Deye WiFi/LAN logger (default port **8899**) or to an RS485↔TCP gateway (Elfin EW11, USR, etc. — usually port **502**).
 - Guided **config flow**: pick your inverter model from a dropdown, then enter host, port, Modbus unit ID and scan interval. No YAML editing needed.
 - Rich set of **sensors**: PV strings, battery, grid import/export, per-phase grid/inverter/load, temperatures, plus daily and lifetime energy counters (ready for the HA Energy dashboard).
@@ -30,7 +31,7 @@ Local Home Assistant integration for **Deye three-phase hybrid inverters** (SUN-
 
 1. In Home Assistant go to **HACS**.
 2. Open the top-right menu **⋮ → Custom repositories**.
-3. Add the repository URL `https://github.com/Developer089/deye-modbus-ha` and choose category **Integration**.
+3. Add the repository URL `https://github.com/vitalii-chukhrii/deye-modbus-ha-clone` and choose category **Integration**.
 4. Find **Deye Modbus (Hybrid Inverter)** in the list and click **Download / Install**.
 5. **Restart Home Assistant.**
 6. Go to **Settings ▸ Devices & Services ▸ Add Integration** and search for **Deye Modbus**.
@@ -75,7 +76,8 @@ All of these share the three-phase low-voltage hybrid protocol (device type `0x0
 
 | Model key | Label |
 |-----------|-------|
-| `sun12k_sg05lp3` | Deye SUN-12K-SG05LP3 (3-phase hybrid) — default |
+| `sun20k_sg05lp3` | Deye SUN-12K-SG05LP3 (3-phase hybrid) — default |
+| `sun12k_sg05lp3` | Deye SUN-12K-SG05LP3 (3-phase hybrid) |
 | `sun_sg05lp3_3ph` | Deye SUN-5/6/8/10/12K-SG05LP3 (3-phase hybrid) |
 | `sun_sg04lp3_3ph` | Deye SUN-5/6/8/10/12K-SG04LP3 (3-phase hybrid) |
 
