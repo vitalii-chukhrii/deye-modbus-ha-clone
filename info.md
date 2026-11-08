@@ -15,7 +15,7 @@ Some entities (PV3/PV4, per-phase detail, TOU slots) ship **disabled by default*
 ## Supported models
 
 - Deye SUN-12K-SG05LP3 (3-phase hybrid)
-- Deye SUN-5/6/8/10/12K-SG05LP3 (3-phase hybrid)
+- Deye SUN-5/6/8/10/12K/20K-SG05LP3 (3-phase hybrid)
 - Deye SUN-5/6/8/10/12K-SG04LP3 (3-phase hybrid)
 
 ## Quick start
@@ -26,4 +26,4 @@ Some entities (PV3/PV4, per-phase detail, TOU slots) ship **disabled by default*
 
 > Note: the inverter accepts only **one Modbus connection at a time**, so this conflicts with SolarMAN cloud logging and other Modbus pollers.
 
-See the [README](https://github.com/Developer089/deye-modbus-ha) for the full entity list, options, services and troubleshooting.
+See the [README](https://github.com/vitalii-chukhrii/deye-modbus-ha-clone) for the full entity list, options, services and troubleshooting.

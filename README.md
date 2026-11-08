@@ -78,7 +78,7 @@ All of these share the three-phase low-voltage hybrid protocol (device type `0x0
 |-----------|-------|
 | `sun20k_sg05lp3` | Deye SUN-12K-SG05LP3 (3-phase hybrid) — default |
 | `sun12k_sg05lp3` | Deye SUN-12K-SG05LP3 (3-phase hybrid) |
-| `sun_sg05lp3_3ph` | Deye SUN-5/6/8/10/12K-SG05LP3 (3-phase hybrid) |
+| `sun_sg05lp3_3ph` | Deye SUN-5/6/8/10/12K/20K-SG05LP3 (3-phase hybrid) |
 | `sun_sg04lp3_3ph` | Deye SUN-5/6/8/10/12K-SG04LP3 (3-phase hybrid) |
 
 Rebadged units on the same platform (Sunsynk, etc.) will generally work too.
@@ -190,7 +190,7 @@ The control and service entities **write settings to your inverter**. Changing w
 ### Instalace přes HACS
 
 1. V **HACS** otevřete menu **⋮ → Custom repositories** (Vlastní repozitáře).
-2. Přidejte adresu `https://github.com/Developer089/deye-modbus-ha` a jako kategorii zvolte **Integration**.
+2. Přidejte adresu `https://github.com/vitalii-chukhrii/deye-modbus-ha-clone` a jako kategorii zvolte **Integration**.
 3. Najděte **Deye Modbus (Hybrid Inverter)** a nainstalujte.
 4. **Restartujte Home Assistant.**
 5. Přejděte do **Nastavení ▸ Zařízení a služby ▸ Přidat integraci** a vyhledejte **Deye Modbus**.
