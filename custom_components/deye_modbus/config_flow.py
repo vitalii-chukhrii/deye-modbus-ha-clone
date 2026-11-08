@@ -112,6 +112,22 @@ class DeyeModbusOptionsFlow(config_entries.OptionsFlow):
         if parity not in {"N", "E", "O"}:
             parity = DEFAULT_PARITY
         return vol.Schema({
+            vol.Required(
+                CONF_MODEL,
+                default=self._entry_default(CONF_MODEL, DEFAULT_MODEL),
+            ): _model_selector(),
+            vol.Required(
+                CONF_HOST,
+                default=self._entry_default(CONF_HOST, ""),
+            ): str,
+            vol.Required(
+                CONF_PORT,
+                default=self._entry_int_default(CONF_PORT, DEFAULT_PORT),
+            ): int,
+            vol.Required(
+                CONF_UNIT_ID,
+                default=self._entry_int_default(CONF_UNIT_ID, DEFAULT_UNIT_ID),
+            ): int,
             vol.Optional(CONF_SCAN_INTERVAL, default=self._entry_int_default(CONF_SCAN_INTERVAL, DEFAULT_SCAN_SECONDS)): vol.All(
                 vol.Coerce(int), vol.Range(min=MIN_SCAN_SECONDS, max=MAX_SCAN_SECONDS)
             ),
@@ -139,7 +155,41 @@ class DeyeModbusOptionsFlow(config_entries.OptionsFlow):
                 if user_input[CONF_FAST_SCAN_INTERVAL] >= user_input[CONF_SCAN_INTERVAL]:
                     errors["base"] = "fast_interval_must_be_less_than_ordinary"
                 else:
-                    return self.async_create_entry(title="", data=user_input)
+                    host = user_input[CONF_HOST]
+                    port = user_input[CONF_PORT]
+                    unit_id = user_input[CONF_UNIT_ID]
+                    unique_id = f"{host}:{port}:{unit_id}"
+                    if any(
+                        entry.entry_id != self.config_entry.entry_id
+                        and entry.unique_id == unique_id
+                        for entry in self.hass.config_entries.async_entries(DOMAIN)
+                    ):
+                        errors["base"] = "already_configured"
+                    else:
+                        model_key = user_input[CONF_MODEL]
+                        model = get_model(model_key)
+                        data = {
+                            **self.config_entry.data,
+                            CONF_HOST: host,
+                            CONF_PORT: port,
+                            CONF_UNIT_ID: unit_id,
+                            CONF_MODEL: model_key,
+                        }
+                        options = {
+                            key: value
+                            for key, value in user_input.items()
+                            if key not in {
+                                CONF_HOST, CONF_PORT, CONF_UNIT_ID, CONF_MODEL,
+                            }
+                        }
+                        self.hass.config_entries.async_update_entry(
+                            self.config_entry,
+                            data=data,
+                            options=options,
+                            title=f"Deye {model['model']} @ {host}",
+                            unique_id=unique_id,
+                        )
+                        return self.async_abort(reason="reconfigure_successful")
         return self.async_show_form(
             step_id="init", data_schema=self._options_schema(), errors=errors
         )

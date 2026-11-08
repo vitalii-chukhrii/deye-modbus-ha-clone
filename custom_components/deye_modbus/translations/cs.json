@@ -27,6 +27,10 @@
       "init": {
         "title": "Možnosti",
         "data": {
+          "model": "Model střídače",
+          "host": "Host / IP adresa",
+          "port": "Port",
+          "unit_id": "Modbus unit ID (slave)",
           "scan_interval": "Běžný interval čtení (s)",
           "fast_scan_interval": "Rychlý interval čtení (s)",
           "transport": "Transport (tcp / rtutcp)",
@@ -39,7 +43,11 @@
       }
     },
     "error": {
-      "fast_interval_must_be_less_than_ordinary": "Rychlý interval čtení musí být kratší než běžný interval čtení."
+      "fast_interval_must_be_less_than_ordinary": "Rychlý interval čtení musí být kratší než běžný interval čtení.",
+      "already_configured": "Jiná položka integrace Deye již používá tento host, port a Modbus unit ID."
+    },
+    "abort": {
+      "reconfigure_successful": "Nastavení připojení bylo aktualizováno."
     }
   }
 }
